@@ -341,7 +341,7 @@
           "link": 21
         }
       ],
-      "title": "Preview Image: t5-large",
+      "title": "Preview Image: baseline",
       "properties": {
         "Node name for S&R": "PreviewImage"
       }
@@ -367,7 +367,7 @@
           "link": 7
         }
       ],
-      "title": "Preview Image: t5-large",
+      "title": "Preview Image: LaVi-bridge-t5-large",
       "properties": {
         "Node name for S&R": "PreviewImage"
       }
