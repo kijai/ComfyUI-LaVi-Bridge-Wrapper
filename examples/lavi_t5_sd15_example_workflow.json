@@ -1,0 +1,249 @@
+{
+  "last_node_id": 5,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 3,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        373,
+        314
+      ],
+      "size": [
+        320.97000488281265,
+        98
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ],
+          "shape": 3
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            3
+          ],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "1_5/dreamshaper_8.safetensors"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "lavibridge_model_loader",
+      "pos": [
+        763,
+        322
+      ],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2,
+          "slot_index": 0
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lavibridge",
+          "type": "LAVIBRIDGE",
+          "links": [
+            1
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "lavibridge_model_loader"
+      }
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        1388,
+        321
+      ],
+      "size": [
+        558.763644131747,
+        569.452726537531
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 5,
+      "type": "lavi_bridge_t5_encoder",
+      "pos": [
+        376,
+        484
+      ],
+      "size": [
+        322.0363714044744,
+        200.2709083557129
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "t5_embeds",
+          "type": "T5EMBEDS",
+          "links": [
+            5
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "lavi_bridge_t5_encoder"
+      },
+      "widgets_values": [
+        "Oppenheimer sits on the beach on a chair, watching a nuclear exposition with a huge mushroom cloud, 120mm, best quality, masterpiece, extremely detailed, 4k resolution",
+        77
+      ]
+    },
+    {
+      "id": 1,
+      "type": "lavibridge_sampler",
+      "pos": [
+        1021,
+        320
+      ],
+      "size": {
+        "0": 315,
+        "1": 246
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "lavibridge_model",
+          "type": "LAVIBRIDGE",
+          "link": 1,
+          "slot_index": 0
+        },
+        {
+          "name": "t5_embeds",
+          "type": "T5EMBEDS",
+          "link": 5,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            4
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "lavibridge_sampler"
+      },
+      "widgets_values": [
+        512,
+        512,
+        4,
+        25,
+        7.5,
+        0,
+        "fixed",
+        "UniPCMultistepScheduler"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      1,
+      0,
+      "LAVIBRIDGE"
+    ],
+    [
+      2,
+      3,
+      0,
+      2,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      3,
+      2,
+      2,
+      1,
+      "VAE"
+    ],
+    [
+      4,
+      1,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      5,
+      0,
+      1,
+      1,
+      "T5EMBEDS"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
