@@ -1,5 +1,7 @@
 # ComfyUI wrapper node to test LaVi-Bridge using Diffusers
 
+![image](https://github.com/kijai/ComfyUI-LaVi-Bridge-Wrapper/assets/40791699/8f2cda87-c9e0-4201-94da-42a4d6181871)
+
 # Installing
 Either use the Manager and it's install from git -feature, or clone this repo to custom_nodes and run:
 
