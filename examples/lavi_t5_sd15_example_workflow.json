@@ -1,66 +1,20 @@
 {
-  "last_node_id": 5,
-  "last_link_id": 5,
+  "last_node_id": 23,
+  "last_link_id": 34,
   "nodes": [
-    {
-      "id": 3,
-      "type": "CheckpointLoaderSimple",
-      "pos": [
-        373,
-        314
-      ],
-      "size": [
-        320.97000488281265,
-        98
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            2
-          ],
-          "shape": 3
-        },
-        {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": null,
-          "shape": 3
-        },
-        {
-          "name": "VAE",
-          "type": "VAE",
-          "links": [
-            3
-          ],
-          "shape": 3,
-          "slot_index": 2
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "CheckpointLoaderSimple"
-      },
-      "widgets_values": [
-        "1_5/dreamshaper_8.safetensors"
-      ]
-    },
     {
       "id": 2,
       "type": "lavibridge_model_loader",
       "pos": [
-        763,
-        322
+        741,
+        313
       ],
       "size": {
         "0": 210,
-        "1": 46
+        "1": 78
       },
       "flags": {},
-      "order": 2,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
@@ -80,98 +34,580 @@
           "name": "lavibridge",
           "type": "LAVIBRIDGE",
           "links": [
-            1
+            6
           ],
-          "shape": 3
+          "shape": 3,
+          "slot_index": 0
         }
       ],
       "properties": {
         "Node name for S&R": "lavibridge_model_loader"
-      }
+      },
+      "widgets_values": [
+        "t5_unet"
+      ]
     },
     {
-      "id": 4,
-      "type": "PreviewImage",
+      "id": 15,
+      "type": "VAEDecode",
       "pos": [
-        1388,
-        321
+        1066,
+        1199
       ],
-      "size": [
-        558.763644131747,
-        569.452726537531
-      ],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
       "flags": {},
-      "order": 4,
+      "order": 14,
       "mode": 0,
       "inputs": [
         {
-          "name": "images",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 19
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 20,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
           "type": "IMAGE",
-          "link": 4
+          "links": [
+            21
+          ],
+          "shape": 3,
+          "slot_index": 0
         }
       ],
       "properties": {
-        "Node name for S&R": "PreviewImage"
+        "Node name for S&R": "VAEDecode"
       }
     },
     {
-      "id": 5,
-      "type": "lavi_bridge_t5_encoder",
+      "id": 19,
+      "type": "StringConstantMultiline",
       "pos": [
-        376,
-        484
+        -57,
+        643
+      ],
+      "size": {
+        "0": 400,
+        "1": 200
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            24,
+            25
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "StringConstantMultiline"
+      },
+      "widgets_values": [
+        "Oppenheimer sits on the beach on a chair, watching a nuclear exposition with a huge mushroom cloud, 120mm, best quality, extremely detailed, 4k resolution",
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        257,
+        311
       ],
       "size": [
-        322.0363714044744,
-        200.2709083557129
+        405.99999237060547,
+        98
       ],
       "flags": {},
       "order": 1,
       "mode": 0,
       "outputs": [
         {
-          "name": "t5_embeds",
-          "type": "T5EMBEDS",
+          "name": "MODEL",
+          "type": "MODEL",
           "links": [
-            5
+            2,
+            22
+          ],
+          "shape": 3
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            17,
+            18
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            3,
+            20
+          ],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "1_5/photon_v1.safetensors"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "CLIPTextEncode",
+      "pos": [
+        520,
+        1100
+      ],
+      "size": [
+        335.39999923706057,
+        117.79999084472661
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            16
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "bad quality"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "CLIPTextEncode",
+      "pos": [
+        510,
+        990
+      ],
+      "size": [
+        339.99999237060547,
+        54
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 17
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 25,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            15
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 18,
+      "type": "EmptyLatentImage",
+      "pos": [
+        1010,
+        1050
+      ],
+      "size": [
+        303.4000007629395,
+        74
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 28,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 29,
+          "widget": {
+            "name": "height"
+          }
+        },
+        {
+          "name": "batch_size",
+          "type": "INT",
+          "link": 30,
+          "widget": {
+            "name": "batch_size"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            23
           ],
           "shape": 3
         }
       ],
       "properties": {
-        "Node name for S&R": "lavi_bridge_t5_encoder"
+        "Node name for S&R": "EmptyLatentImage"
       },
       "widgets_values": [
-        "Oppenheimer sits on the beach on a chair, watching a nuclear exposition with a huge mushroom cloud, 120mm, best quality, masterpiece, extremely detailed, 4k resolution",
-        77
+        512,
+        512,
+        4
       ]
     },
     {
-      "id": 1,
-      "type": "lavibridge_sampler",
+      "id": 16,
+      "type": "PreviewImage",
       "pos": [
-        1021,
-        320
+        1465,
+        889
       ],
       "size": {
-        "0": 315,
-        "1": 246
+        "0": 558.763671875,
+        "1": 569.4526977539062
       },
       "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 21
+        }
+      ],
+      "title": "Preview Image: t5-large",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        1465,
+        260
+      ],
+      "size": {
+        "0": 558.763671875,
+        "1": 569.4526977539062
+      },
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "title": "Preview Image: t5-large",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 20,
+      "type": "INTConstant",
+      "pos": [
+        637,
+        607
+      ],
+      "size": [
+        200,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "links": [
+            26,
+            28
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "Width",
+      "properties": {
+        "Node name for S&R": "INTConstant"
+      },
+      "widgets_values": [
+        512
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 21,
+      "type": "INTConstant",
+      "pos": [
+        640,
+        713
+      ],
+      "size": [
+        200,
+        58
+      ],
+      "flags": {},
       "order": 3,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "links": [
+            27,
+            29
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "Height",
+      "properties": {
+        "Node name for S&R": "INTConstant"
+      },
+      "widgets_values": [
+        512
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 22,
+      "type": "INTConstant",
+      "pos": [
+        642,
+        826
+      ],
+      "size": [
+        200,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "links": [
+            30,
+            31
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "Batch_size",
+      "properties": {
+        "Node name for S&R": "INTConstant"
+      },
+      "widgets_values": [
+        4
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 12,
+      "type": "KSampler",
+      "pos": [
+        990,
+        745
+      ],
+      "size": [
+        356.99999237060547,
+        262
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 22,
+          "slot_index": 0
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 15
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 16
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 23,
+          "slot_index": 3
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "link": 34,
+          "widget": {
+            "name": "seed"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            19
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        124,
+        "fixed",
+        25,
+        7.5,
+        "uni_pc",
+        "normal",
+        1
+      ]
+    },
+    {
+      "id": 6,
+      "type": "lavibridge_sampler",
+      "pos": [
+        999,
+        295
+      ],
+      "size": [
+        373.99999237060547,
+        246
+      ],
+      "flags": {},
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
           "name": "lavibridge_model",
           "type": "LAVIBRIDGE",
-          "link": 1,
-          "slot_index": 0
+          "link": 6
         },
         {
-          "name": "t5_embeds",
-          "type": "T5EMBEDS",
-          "link": 5,
+          "name": "lavi_embeds",
+          "type": "LAVIEMBEDS",
+          "link": 13,
           "slot_index": 1
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 26,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 27,
+          "widget": {
+            "name": "height"
+          }
+        },
+        {
+          "name": "batch_size",
+          "type": "INT",
+          "link": 31,
+          "widget": {
+            "name": "batch_size"
+          }
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "link": 33,
+          "widget": {
+            "name": "seed"
+          },
+          "slot_index": 5
         }
       ],
       "outputs": [
@@ -179,7 +615,7 @@
           "name": "images",
           "type": "IMAGE",
           "links": [
-            4
+            7
           ],
           "shape": 3,
           "slot_index": 0
@@ -194,21 +630,93 @@
         4,
         25,
         7.5,
-        0,
+        124,
         "fixed",
         "UniPCMultistepScheduler"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "PrimitiveNode",
+      "pos": [
+        991,
+        607
+      ],
+      "size": [
+        272.70000152587886,
+        82.99999084472654
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            33,
+            34
+          ],
+          "widget": {
+            "name": "seed"
+          },
+          "slot_index": 0
+        }
+      ],
+      "title": "seed",
+      "properties": {
+        "Run widget replace on values": false
+      },
+      "widgets_values": [
+        124,
+        "fixed"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "lavi_bridge_t5_encoder",
+      "pos": [
+        273,
+        458
+      ],
+      "size": [
+        360.99999237060547,
+        70
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 24,
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lavi_embeds",
+          "type": "LAVIEMBEDS",
+          "links": [
+            13
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "lavi_bridge_t5_encoder"
+      },
+      "widgets_values": [
+        "Oppenheimer sits on the beach on a chair, watching a nuclear exposition with a huge mushroom cloud, 120mm, best quality, extremely detailed, 4k resolution",
+        77
       ]
     }
   ],
   "links": [
-    [
-      1,
-      2,
-      0,
-      1,
-      0,
-      "LAVIBRIDGE"
-    ],
     [
       2,
       3,
@@ -226,20 +734,180 @@
       "VAE"
     ],
     [
-      4,
-      1,
+      6,
+      2,
+      0,
+      6,
+      0,
+      "LAVIBRIDGE"
+    ],
+    [
+      7,
+      6,
       0,
       4,
       0,
       "IMAGE"
     ],
     [
-      5,
-      5,
+      13,
+      7,
       0,
+      6,
       1,
+      "LAVIEMBEDS"
+    ],
+    [
+      15,
+      13,
+      0,
+      12,
       1,
-      "T5EMBEDS"
+      "CONDITIONING"
+    ],
+    [
+      16,
+      14,
+      0,
+      12,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      17,
+      3,
+      1,
+      13,
+      0,
+      "CLIP"
+    ],
+    [
+      18,
+      3,
+      1,
+      14,
+      0,
+      "CLIP"
+    ],
+    [
+      19,
+      12,
+      0,
+      15,
+      0,
+      "LATENT"
+    ],
+    [
+      20,
+      3,
+      2,
+      15,
+      1,
+      "VAE"
+    ],
+    [
+      21,
+      15,
+      0,
+      16,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      3,
+      0,
+      12,
+      0,
+      "MODEL"
+    ],
+    [
+      23,
+      18,
+      0,
+      12,
+      3,
+      "LATENT"
+    ],
+    [
+      24,
+      19,
+      0,
+      7,
+      0,
+      "STRING"
+    ],
+    [
+      25,
+      19,
+      0,
+      13,
+      1,
+      "STRING"
+    ],
+    [
+      26,
+      20,
+      0,
+      6,
+      2,
+      "INT"
+    ],
+    [
+      27,
+      21,
+      0,
+      6,
+      3,
+      "INT"
+    ],
+    [
+      28,
+      20,
+      0,
+      18,
+      0,
+      "INT"
+    ],
+    [
+      29,
+      21,
+      0,
+      18,
+      1,
+      "INT"
+    ],
+    [
+      30,
+      22,
+      0,
+      18,
+      2,
+      "INT"
+    ],
+    [
+      31,
+      22,
+      0,
+      6,
+      4,
+      "INT"
+    ],
+    [
+      33,
+      23,
+      0,
+      6,
+      5,
+      "INT"
+    ],
+    [
+      34,
+      23,
+      0,
+      12,
+      4,
+      "INT"
     ]
   ],
   "groups": [],

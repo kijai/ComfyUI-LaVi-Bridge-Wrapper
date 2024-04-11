@@ -1,4 +1,3 @@
-
 import os
 from tqdm.auto import tqdm
 
@@ -44,6 +43,14 @@ class lavibridge_model_loader:
         return {"required": {
             "model": ("MODEL",),
             "vae": ("VAE",),
+            "lora_type": (
+                [
+                    'llama2_unet',
+                    't5_unet',
+                ], {
+                    "default": 't5_unet'
+                }),
+            
             },
         }
 
@@ -52,7 +59,7 @@ class lavibridge_model_loader:
     FUNCTION = "loadmodel"
     CATEGORY = "LaVI-BridgeWrapper"
 
-    def loadmodel(self, model, vae):
+    def loadmodel(self, model, vae, lora_type):
         mm.soft_empty_cache()
         dtype = mm.unet_dtype()
         vae_dtype = mm.vae_dtype()
@@ -68,13 +75,13 @@ class lavibridge_model_loader:
             
             # load models
             lavibridge_folder = os.path.join(folder_paths.models_dir,'lavibridge')
-            lora_vis_path = os.path.join(lavibridge_folder, 't5_unet', 'lora_vis.pt')
+            lora_vis_path = os.path.join(lavibridge_folder, lora_type, 'lora_vis.pt')
 
             if not os.path.exists(lora_vis_path):
                 print(f"Downloading LaVi-Bridge from https://huggingface.co/shihaozhao/LaVi-Bridge {lavibridge_folder}")
                 from huggingface_hub import snapshot_download
-                snapshot_download(repo_id="shihaozhao/LaVi-Bridge", allow_patterns=["*t5_unet*"],local_dir=lavibridge_folder, local_dir_use_symlinks=False)
-            
+                snapshot_download(repo_id="shihaozhao/LaVi-Bridge", allow_patterns=[f"*{lora_type}*"],local_dir=lavibridge_folder, local_dir_use_symlinks=False)
+            print(f"Loaded LaVi-Bridge lora {lora_vis_path}")
             pbar.update(1)
             
             # get state dict from comfy models
@@ -119,17 +126,84 @@ class lavibridge_model_loader:
         return (lavibridge_model,)
 
 
-class lavi_bridge_t5_encoder:
+class lavi_bridge_llama_encoder:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            "prompt": ("STRING", {"multiline": True, "default": "A vivid red book with a smooth, matte cover lies next to a glossy yellow vase. The vase, with a slightly curved silhouette, stands on a dark wood table with a noticeable grain pattern. The book appears slightly worn at the edges, suggesting frequent use, while the vase holds a fresh array of multicolored wildflowers.",}),
+            "prompt": ("STRING", {"multiline": True, "default": "Oppenheimer sits on the beach on a chair, watching a nuclear exposition with a huge mushroom cloud, 120mm",}),
             "max_length": ("INT", {"default": 77, "min": 1, "max": 512, "step": 1}),
             },
         }
 
-    RETURN_TYPES = ("T5EMBEDS",)
-    RETURN_NAMES = ("t5_embeds",)
+    RETURN_TYPES = ("LAVIEMBEDS",)
+    RETURN_NAMES = ("lavi_embeds",)
+    FUNCTION = "process"
+    CATEGORY = "LaVI-BridgeWrapper"
+
+    def process(self, prompt, max_length):
+        from transformers import LlamaForCausalLM, LlamaTokenizer
+        device = mm.get_torch_device()
+        offload_device = mm.unet_offload_device()
+        mm.soft_empty_cache()
+        dtype = mm.unet_dtype()
+        if not hasattr(self, "text_encoder"):    
+            #llama2
+            llama2_path = os.path.join(folder_paths.models_dir,'llama2', 'Llama-2-7b-hf')
+            if not os.path.exists(llama2_path): 
+                from huggingface_hub import snapshot_download
+                snapshot_download(repo_id="NousResearch/Llama-2-7b-hf", local_dir=llama2_path,  ignore_patterns=["*.bin"], local_dir_use_symlinks=False)
+
+            #adapter
+            adapter_folder = os.path.join(folder_paths.models_dir,'lavibridge')
+            adapter_path = os.path.join(adapter_folder, 'llama2_unet','adapter')
+            if not os.path.exists(adapter_path):
+                print(f"Downloading LaVi-Bridge from https://huggingface.co/shihaozhao/LaVi-Bridge {adapter_folder}")
+                from huggingface_hub import snapshot_download
+                snapshot_download(repo_id="shihaozhao/LaVi-Bridge", allow_patterns=["*llama2_unet*"],local_dir=adapter_folder, local_dir_use_symlinks=False)
+
+            lora_text_path = os.path.join(adapter_folder, 'llama2_unet', 'lora_text.pt')
+
+            self.adapter = TextAdapter.from_pretrained(adapter_path).eval().to(dtype)
+            self.tokenizer = LlamaTokenizer.from_pretrained(llama2_path)
+            self.tokenizer.pad_token = '[PAD]'
+            self.text_encoder = LlamaForCausalLM.from_pretrained(llama2_path, torch_dtype=dtype)
+           
+            monkeypatch_or_replace_lora_extended(
+                self.text_encoder, 
+                torch.load(lora_text_path), 
+                r=32, 
+                target_replace_module = {"LlamaAttention"},
+            )
+
+        self.adapter.to(device)
+        self.text_encoder.to(device)
+
+        autocast_condition = (dtype != torch.float32) and not mm.is_device_mps(device)
+        with torch.autocast(mm.get_autocast_device(device), dtype=dtype) if autocast_condition else nullcontext():
+            text_ids = self.tokenizer(prompt, padding="max_length", max_length=max_length, return_tensors="pt", truncation=True).input_ids.to(device)
+            text_embeddings = self.text_encoder(input_ids=text_ids, output_hidden_states=True).hidden_states[-1]
+            text_embeddings = self.adapter(text_embeddings).sample
+            uncond_input = self.tokenizer([""], padding="max_length", max_length=max_length, return_tensors="pt")
+            uncond_embeddings = self.text_encoder(uncond_input.input_ids.to(device), output_hidden_states=True).hidden_states[-1]
+            uncond_embeddings =  self.adapter(uncond_embeddings).sample
+            text_embeddings = torch.cat([uncond_embeddings, text_embeddings])
+
+            self.adapter.to(offload_device)
+            self.text_encoder.to(offload_device)
+
+            return (text_embeddings,)
+        
+class lavi_bridge_t5_encoder:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "prompt": ("STRING", {"multiline": True, "default": "Oppenheimer sits on the beach on a chair, watching a nuclear exposition with a huge mushroom cloud, 120mm",}),
+            "max_length": ("INT", {"default": 77, "min": 1, "max": 512, "step": 1}),
+            },
+        }
+
+    RETURN_TYPES = ("LAVIEMBEDS",)
+    RETURN_NAMES = ("lavi_embeds",)
     FUNCTION = "process"
     CATEGORY = "LaVI-BridgeWrapper"
 
@@ -152,7 +226,7 @@ class lavi_bridge_t5_encoder:
             if not os.path.exists(adapter_path):
                 print(f"Downloading LaVi-Bridge from https://huggingface.co/shihaozhao/LaVi-Bridge {adapter_folder}")
                 from huggingface_hub import snapshot_download
-                snapshot_download(repo_id="shihaozhao/LaVi-Bridge", allow_patterns=["t5_unet"],local_dir=adapter_folder, local_dir_use_symlinks=False)
+                snapshot_download(repo_id="shihaozhao/LaVi-Bridge", allow_patterns=["*t5_unet*"],local_dir=adapter_folder, local_dir_use_symlinks=False)
 
             lora_text_path = os.path.join(adapter_folder, 't5_unet', 'lora_text.pt')
 
@@ -190,7 +264,7 @@ class lavibridge_sampler:
     def INPUT_TYPES(s):
         return {"required": {
             "lavibridge_model": ("LAVIBRIDGE",),
-            "t5_embeds": ("T5EMBEDS",),
+            "lavi_embeds": ("LAVIEMBEDS",),
             "width": ("INT", {"default": 512, "min": 64, "max": 2048, "step": 64}),
             "height": ("INT", {"default": 512, "min": 64, "max": 2048, "step": 64}),
             "batch_size": ("INT", {"default": 1, "min": 1, "max": 256, "step": 1}),
@@ -220,7 +294,7 @@ class lavibridge_sampler:
     FUNCTION = "process"
     CATEGORY = "LaVI-BridgeWrapper"
 
-    def process(self, lavibridge_model, t5_embeds, width, height, batch_size, steps, guidance_scale, seed, scheduler):
+    def process(self, lavibridge_model, lavi_embeds, width, height, batch_size, steps, guidance_scale, seed, scheduler):
         device = mm.get_torch_device()
         offload_device = mm.unet_offload_device()
         mm.unload_all_models()
@@ -273,14 +347,14 @@ class lavibridge_sampler:
             latents = latents * noise_scheduler.init_noise_sigma
             vae.to(offload_device)
 
-            t5_embeds_repeated = t5_embeds.repeat_interleave(batch_size, dim=0)
+            lavi_embeds_repeated = lavi_embeds.repeat_interleave(batch_size, dim=0)
             # Model prediction
             noise_scheduler.set_timesteps(steps)
 
             for t in tqdm(noise_scheduler.timesteps):
                 latent_model_input = torch.cat([latents] * 2, dim=0)
                 latent_model_input = noise_scheduler.scale_model_input(latent_model_input, timestep=t)
-                noise_pred = unet(latent_model_input, t, encoder_hidden_states=t5_embeds_repeated).sample
+                noise_pred = unet(latent_model_input, t, encoder_hidden_states=lavi_embeds_repeated).sample
                 noise_pred_uncond, noise_pred_text = noise_pred.chunk(2, dim=0)
                 noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
                 latents = noise_scheduler.step(noise_pred, t, latents).prev_sample
@@ -300,11 +374,13 @@ class lavibridge_sampler:
 NODE_CLASS_MAPPINGS = {
     "lavibridge_sampler": lavibridge_sampler,
     "lavi_bridge_t5_encoder": lavi_bridge_t5_encoder,
-    "lavibridge_model_loader": lavibridge_model_loader
+    "lavibridge_model_loader": lavibridge_model_loader,
+    "lavi_bridge_llama_encoder": lavi_bridge_llama_encoder
   
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "lavibridge_sampler": "LaVi-Bridge Sampler",
     "lavi_bridge_t5_encoder": "LaVi-Bridge T5 Encoder",
-    "lavibridge_model_loader": "LaVi-Bridge Model Loader"
+    "lavibridge_model_loader": "LaVi-Bridge Model Loader",
+    "lavi_bridge_llama_encoder": "LaVi-Bridge LLaMA Encoder"
 }
