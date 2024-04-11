@@ -21,7 +21,7 @@ try:
         create_unet_diffusers_config
     )
 except:
-    print("Diffusers version too old. Please update to 0.26.0 minimum.")
+    raise ImportError("Diffusers version too old. Please update to 0.26.0 minimum.")
 
 import torch
 from contextlib import nullcontext
