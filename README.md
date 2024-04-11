@@ -16,3 +16,5 @@ The following is autodownloaded:
 https://huggingface.co/Kijai/t5-large-encoder-only-bf16/ to `ComfyUI/models/t5_model/`
 
 https://huggingface.co/shihaozhao/LaVi-Bridge/ to `ComfyUI/models/lavibridge`
+
+I couldn't get anything useful out of the llama2 version, it's included as separate node. Maybe I made mistake, maybe it just isn't that good, I don't know currently.
