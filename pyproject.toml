@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-lavi-bridge-wrapper"
+description = "ComfyUI wrapper node to test LaVi-Bridge using Diffusers"
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["diffusers>=0.26.0", "sentencepiece", "peft>=0.8.2"]
+
+[project.urls]
+Repository = "https://github.com/kijai/ComfyUI-LaVi-Bridge-Wrapper"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-LaVi-Bridge-Wrapper"
+Icon = ""
